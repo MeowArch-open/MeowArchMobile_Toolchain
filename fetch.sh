@@ -21,7 +21,9 @@ archive="$root/$MEOWARCH_TOOLCHAIN_ASSET"
 url="https://github.com/MeowArch-open/MeowArchMobile_Toolchain/releases/download/host-x86_64-$MEOWARCH_TOOLCHAIN_VERSION/$MEOWARCH_TOOLCHAIN_ASSET"
 
 if [ ! -f "$archive" ]; then
-	curl --fail --location --retry 5 --retry-all-errors --output "$archive" "$url"
+	curl_args=(--fail --location --retry 5 --retry-all-errors --output "$archive")
+	[ -n "${MEOWARCH_PROXY:-}" ] && curl_args+=(--proxy "$MEOWARCH_PROXY")
+	curl "${curl_args[@]}" "$url"
 fi
 printf '%s  %s\n' "$MEOWARCH_TOOLCHAIN_SHA256" "$archive" | sha256sum -c -
 tar --zstd -xf "$archive" -C "$root"
@@ -29,6 +31,7 @@ tar --zstd -xf "$archive" -C "$root"
 cat >"$root/env.sh" <<EOF
 export MEOWARCH_TOOLCHAIN_ROOT=$(printf '%q' "$root")
 export PATH=\"\$MEOWARCH_TOOLCHAIN_ROOT/usr/bin:\$PATH\"
+export LD_LIBRARY_PATH=\"\$MEOWARCH_TOOLCHAIN_ROOT/usr/lib:\$MEOWARCH_TOOLCHAIN_ROOT/lib:\${LD_LIBRARY_PATH:-}\"
 export CROSS_COMPILE=\"\$MEOWARCH_TOOLCHAIN_ROOT/usr/bin/aarch64-linux-gnu-\"
 export CLANG_TRIPLE=aarch64-linux-gnu
 export LLVM=1
