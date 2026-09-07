@@ -20,12 +20,18 @@ mkdir -p "$root"
 archive="$root/$MEOWARCH_TOOLCHAIN_ASSET"
 url="https://github.com/MeowArch-open/MeowArchMobile_Toolchain/releases/download/host-x86_64-$MEOWARCH_TOOLCHAIN_VERSION/$MEOWARCH_TOOLCHAIN_ASSET"
 
-if [ ! -f "$archive" ]; then
-	curl_args=(--fail --location --retry 5 --retry-all-errors --output "$archive")
+valid=0
+if [ -f "$archive" ] && printf '%s  %s\n' "$MEOWARCH_TOOLCHAIN_SHA256" "$archive" | sha256sum -c - >/dev/null 2>&1; then
+	valid=1
+fi
+if [ "$valid" -eq 0 ]; then
+	part="$archive.part"
+	curl_args=(--fail --location --retry 5 --retry-all-errors --output "$part")
 	[ -n "${MEOWARCH_PROXY:-}" ] && curl_args+=(--proxy "$MEOWARCH_PROXY")
 	curl "${curl_args[@]}" "$url"
+	printf '%s  %s\n' "$MEOWARCH_TOOLCHAIN_SHA256" "$part" | sha256sum -c -
+	mv -f "$part" "$archive"
 fi
-printf '%s  %s\n' "$MEOWARCH_TOOLCHAIN_SHA256" "$archive" | sha256sum -c -
 tar --zstd -xf "$archive" -C "$root"
 
 cat >"$root/env.sh" <<EOF
