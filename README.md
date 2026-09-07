@@ -12,6 +12,9 @@ aarch64-linux-gnu-gcc
 aarch64-linux-gnu-binutils
 aarch64-linux-gnu-glibc
 aarch64-linux-gnu-linux-api-headers
+dtc / grub / mtools / dosfstools / e2fsprogs
+make / cmake / meson / ninja / nasm
+python / pip / virtualenv / setuptools / uuid
 ```
 
 The payload is a GitHub Release asset rather than a Git blob. This keeps the
